@@ -7,15 +7,16 @@ import {
     StyleSheet,
     Alert,
 } from 'react-native';
+import { API_ENDPOINT } from '@env';
 
 type Props = {
     email: string;
     onSuccess: () => void;
     onCancel?: () => void;
-    endpoint:string;
+    endpoint: string;
 };
 
-export default function OTPVerification({ email, onSuccess, onCancel,endpoint}: Props) {
+export default function OTPVerification({ email, onSuccess, onCancel, endpoint }: Props) {
     const [otp, setOtp] = useState('');
     const [otpError, setOtpError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -25,8 +26,9 @@ export default function OTPVerification({ email, onSuccess, onCancel,endpoint}: 
         setLoading(true);
         try {
             console.log("entered in the verify-otp");
-            console.log(email,otp);
-            const res = await fetch(`http://localhost:3000/api/${endpoint}`, {
+            console.log(email, otp);
+            const res = await fetch(
+                `${API_ENDPOINT}/api/${endpoint}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, otp }),
@@ -51,13 +53,13 @@ export default function OTPVerification({ email, onSuccess, onCancel,endpoint}: 
     return (
         <View style={styles.otpOverlay}>
             <View style={styles.otpContainer}>
-                <Text style={styles.otpTitle}>Enter OTP</Text>
+                <Text style={styles.otpTitle}>We sent an otp to your email</Text>
                 <TextInput
                     style={styles.otpInput}
                     value={otp}
                     onChangeText={(text) => {
-                        setOtp(text);       
-                        setOtpError("");   
+                        setOtp(text);
+                        setOtpError("");
                     }}
                     keyboardType="numeric"
                     maxLength={6}

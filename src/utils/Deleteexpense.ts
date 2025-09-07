@@ -1,5 +1,5 @@
 import { Alert } from 'react-native';
-
+import { API_ENDPOINT } from '@env';
 export const DeleteExpense = async (
   id: string,
   refreshExpenses: () => void,
@@ -9,16 +9,13 @@ export const DeleteExpense = async (
     setLoading(true);
     console.log(id, 'reached');
 
-    const response = await fetch(
-      `http://localhost:3000/api/delete-expense/${id}`,
-      {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
+    const response = await fetch(`${API_ENDPOINT}/api/delete-expense/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
       },
-    );
+      credentials: 'include',
+    });
 
     const data = await response.json();
 

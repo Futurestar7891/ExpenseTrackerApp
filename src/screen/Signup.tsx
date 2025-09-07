@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
+import { API_ENDPOINT } from "@env"
 import React, { useState } from 'react';
 import { Formik } from 'formik';
 import Loginbg from '../assets/LoginBg.png';
@@ -49,7 +50,7 @@ export default function Signup({ navigation }: Props) {
     const slowTimer = setTimeout(() => setSlowMessage(true), 5000);
 
     try {
-      const res = await fetch(`http://localhost:3000/api/signup`, {
+      const res = await fetch(`${API_ENDPOINT}/api/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(values),
@@ -68,10 +69,10 @@ export default function Signup({ navigation }: Props) {
           });
           setBackendErrors(errorsObj);
         } else {
-          setBackendErrors({ email: 'Signup failed. Please try again.' });
+          setBackendErrors({ email: data.message });
         }
       } else {
-       
+
         setSignupEmail(values.email);
         setShowOtpModal(true);
 

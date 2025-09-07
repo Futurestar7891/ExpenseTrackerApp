@@ -1,6 +1,7 @@
+import { API_ENDPOINT } from '@env';
 export const verifyOtp = async (email: string, otp: string) => {
   try {
-    const res = await fetch('http://localhost:3000/api/verify-otp', {
+    const res = await fetch(`${API_ENDPOINT}/api/verify-otp`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, otp }),

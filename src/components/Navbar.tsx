@@ -14,6 +14,7 @@ export default function Navbar() {
      const navigation = useNavigation<NavigationProp>();
     const { daterange, expenseData, setTotalAmount } = useFilter();
     
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     
     const totalExpense = expenseData.reduce(
         (acc: number, expense: any) => acc + (expense.amount || 0),
@@ -23,6 +24,22 @@ export default function Navbar() {
     useEffect(() => {
         setTotalAmount(totalExpense);
     }, [expenseData]);
+
+    const formatDate = (dateStr: string | null) => {
+        if (!dateStr) return "";
+
+        const [day, month, year] = dateStr.split("/"); 
+
+        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+        const monthIndex = parseInt(month, 10) - 1;
+
+        if (monthIndex < 0 || monthIndex > 11) return "Invalid date";
+
+        return `${day} ${monthNames[monthIndex]} ${year}`;
+    };
+
+
 
     return (
         <SafeAreaView style={styles.container}>
@@ -51,7 +68,7 @@ export default function Navbar() {
 
                     {/* ✅ Show date range */}
                     <Text>
-                        {daterange.startDate} - {daterange.endDate}
+                        {formatDate(daterange.startDate)} - {formatDate(daterange.endDate)}
                     </Text>
                 </View>
 

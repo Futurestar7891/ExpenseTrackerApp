@@ -27,16 +27,18 @@ export default function HomeScreen({ navigation }: Props) {
         setDateRange,
         setIsLoggedIn,
         setUser,
+        
+       
     } = useFilter();
 
     const [expandheight, setExpandHeight] = useState(false);
-    const [loadingCategories, setLoadingCategories] = useState(true);
+    const [loading, setLoading] = useState(true);
     const [slowMessage, setSlowMessage] = useState(false);
 
     // Fetch categories
     useEffect(() => {
-        const timer = setTimeout(() => setSlowMessage(true), 2000);
-        FetchCategories(setCategories, setLoadingCategories).finally(() => {
+        const timer = setTimeout(() => setSlowMessage(true), 5000);
+        FetchCategories(setCategories, setLoading).finally(() => {
             clearTimeout(timer);
             setSlowMessage(false);
         });
@@ -48,17 +50,21 @@ export default function HomeScreen({ navigation }: Props) {
 
     // Fetch expenses whenever filters change
     useEffect(() => {
-        FetchExpenses(setExpenseData, setDateRange, filters);
+        const timer = setTimeout(() => setSlowMessage(true), 5000);
+        FetchExpenses(setExpenseData, setDateRange, filters ).finally(() => {
+            clearTimeout(timer);
+            setSlowMessage(false);
+        });;
     }, [filters]);
 
-    if (loadingCategories) {
+    if (loading) {
         return (
             <View style={styles.loaderContainer}>
                 <ActivityIndicator size="large" color="#007AFF" />
                 <Text style={styles.loaderText}>
                     {slowMessage
-                        ? "Database is taking longer than usual. Please wait..."
-                        : "Loading Home Page..."}
+                        ? "Database is taking longer . Please wait..."
+                        : "Loading data..."}
                 </Text>
             </View>
         );

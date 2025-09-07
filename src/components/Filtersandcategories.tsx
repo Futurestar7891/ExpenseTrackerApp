@@ -1,9 +1,9 @@
-import { StyleSheet, TouchableOpacity, Text, ScrollView, View, TextInput, } from 'react-native';
+import { StyleSheet, TouchableOpacity, Text, ScrollView, View, TextInput } from 'react-native';
 import React, { useState } from 'react';
 import { useFilter } from '../Context';
 
 export default function FiltersAndCategories() {
-    const { toggleCategory, filters, setMinAmount, setMaxAmount, setStartDate, setEndDate } = useFilter();
+    const { toggleCategory, filters, setMinAmount, setMaxAmount, setStartDate, setEndDate,daterange,setDateRange } = useFilter();
 
     const [minprice, setMinPrice] = useState<string>('');
     const [maxprice, setMaxPrice] = useState<string>('');
@@ -12,10 +12,11 @@ export default function FiltersAndCategories() {
 
     const [minPriceError, setMinPriceError] = useState<string>('');
     const [maxPriceError, setMaxPriceError] = useState<string>('');
-    const [startDateError, setStartDateError] = useState<string>('');
-    const [endDateError, setEndDateError] = useState<string>('');
+ 
+    const [startDateError,setStartDateError]=useState("");
+    const [endDateError,setEndDateError]=useState("");
 
-    // Handle price filter immediately
+    // ✅ Price filter validation
     const handleApplyPriceOnChange = (min: string, max: string) => {
         let valid = true;
         const minValue = min ? Number(min) : null;
@@ -41,7 +42,6 @@ export default function FiltersAndCategories() {
             setMaxPriceError("");
         }
 
-        // Validate min ≤ max
         if (
             minValue !== null &&
             maxValue !== null &&
@@ -56,88 +56,89 @@ export default function FiltersAndCategories() {
 
         setMinAmount(valid ? minValue : null);
         setMaxAmount(valid ? maxValue : null);
-
     };
 
-    // Handle date filter immediately
+    // ✅ Date filter validation
     const handleApplyDateOnChange = (start: string, end: string) => {
         const validateDate = (dateStr: string) => {
-            const regex =
-                /^([1-9]|0?[1-9]|[12][0-9]|3[01])\/([1-9]|0?[1-9]|1[0-2])\/(\d{4})$/;
+            const regex = /^([0-2][0-9]|3[0-1])\/(0[1-9]|1[0-2])\/\d{4}$/;
             return regex.test(dateStr);
         };
 
+        const parseDate = (dateStr: string): Date | null => {
+            if (!validateDate(dateStr)) return null;
+            const [day, month, year] = dateStr.split("/").map(Number);
+            return new Date(year, month - 1, day);
+        };
+
+        const formatDateForBackend = (d: string | null) => {
+            if (!d) return null;
+            const [day, month, year] = d.split("/").map(Number);
+            return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+        };
+
         let valid = true;
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
 
-        let startDateObj: Date | null = null;
-        let endDateObj: Date | null = null;
+        const minRangeDate = daterange.startDate ? parseDate(daterange.startDate) : null;
+        const maxRangeDate = daterange.endDate ? parseDate(daterange.endDate) : null;
 
-        // ✅ Validate start date
+
+        const startDateObj = start ? parseDate(start) : null;
+        const endDateObj = end ? parseDate(end) : null;
+
+        // Validate Start Date
         if (start) {
-            if (!validateDate(start)) {
-                setStartDateError("Invalid date");
+            if (!startDateObj) {
+                setStartDateError("Invalid format (dd/mm/yyyy)");
+                valid = false;
+            } else if (minRangeDate && startDateObj < minRangeDate) {
+                setStartDateError("Start date cannot be before allowed range");
+                valid = false;
+            } else if (maxRangeDate && startDateObj > maxRangeDate) {
+                setStartDateError("Start date cannot be after allowed range");
+                valid = false;
+            } else if (endDateObj && startDateObj > endDateObj) {
+                setStartDateError("Start date cannot be after end date");
                 valid = false;
             } else {
-                const [sd, sm, sy] = start.split("/").map(Number);
-                startDateObj = new Date(sy, sm - 1, sd);
-
-                if (startDateObj > today) {
-                    setStartDateError("Start date cannot be in the future");
-                    valid = false;
-                } else {
-                    setStartDateError("");
-                }
+                setStartDateError("");
             }
         } else {
             setStartDateError("");
         }
 
-        // ✅ Validate end date
+        // Validate End Date
         if (end) {
-            if (!validateDate(end)) {
-                setEndDateError("Invalid date");
+            if (!endDateObj) {
+                setEndDateError("Invalid format (dd/mm/yyyy)");
+                valid = false;
+            } else if (minRangeDate && endDateObj < minRangeDate) {
+                setEndDateError("End date cannot be before allowed range");
+                valid = false;
+            } else if (maxRangeDate && endDateObj > maxRangeDate) {
+                setEndDateError("End date cannot be after allowed range");
+                valid = false;
+            } else if (startDateObj && endDateObj < startDateObj) {
+                setEndDateError("End date cannot be before start date");
                 valid = false;
             } else {
-                const [ed, em, ey] = end.split("/").map(Number);
-                endDateObj = new Date(ey, em - 1, ed);
-
-                if (endDateObj > today) {
-                    setEndDateError("End date cannot be in the future");
-                    valid = false;
-                } else {
-                    setEndDateError("");
-                }
+                setEndDateError("");
             }
         } else {
             setEndDateError("");
         }
 
-        // ✅ Cross-check only if both are valid
-        if (startDateObj && endDateObj && startDateObj > endDateObj) {
-            setStartDateError("Cannot be after End date");
-            setEndDateError("Cannot be before Start date");
-            valid = false;
-        }
-
-        const formatDate = (d: string | null) => {
-            if (!d) return null;
-            const [day, month, year] = d.split("/").map(Number);
-            return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(
-                2,
-                "0"
-            )}`;
-        };
-
-        setStartDate(valid && start ? formatDate(start) : null);
-        setEndDate(valid && end ? formatDate(end) : null);
+        setStartDate(valid && start ? formatDateForBackend(start) : null);
+        setEndDate(valid && end ? formatDateForBackend(end) : null);
     };
+
+
+
 
 
     return (
         <>
-            {/* Categories Scroll */}
+            {/* Categories */}
             <View style={styles.scrollWrapper}>
                 <ScrollView
                     horizontal
@@ -158,7 +159,7 @@ export default function FiltersAndCategories() {
                 </ScrollView>
             </View>
 
-            {/* Filter Inputs */}
+            {/* Filters */}
             <View style={styles.filtermaincontainer}>
                 {/* Price Filter */}
                 <View style={styles.filtercontainer}>
@@ -262,7 +263,6 @@ const styles = StyleSheet.create({
     },
     filtermaincontainer: {
         minHeight: 140,
-        justifyContent: 'flex-start',
         backgroundColor: 'white',
         marginHorizontal: 3,
         marginVertical: 5,
@@ -279,7 +279,6 @@ const styles = StyleSheet.create({
     },
     inputwrapper: {
         width: '40%',
-        justifyContent: 'flex-start',
     },
     input: {
         width: '100%',

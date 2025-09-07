@@ -11,6 +11,7 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons';
 import { RouteProp } from "@react-navigation/native";
 import { RootStackParamsList } from "../routes/PublicRoute";
+import { API_ENDPOINT } from '@env';
 
 // Define the route props type
 type ChangePasswordScreenRouteProp = RouteProp<RootStackParamsList, 'Changepassword'>;
@@ -20,8 +21,8 @@ type Props = {
     route: ChangePasswordScreenRouteProp;
 };
 
-export default function Changepassword({ route,navigation }: Props) {
-    const { email } = route.params; 
+export default function Changepassword({ route, navigation }: Props) {
+    const { email } = route.params;
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showNewPassword, setShowNewPassword] = useState(false);
@@ -107,9 +108,10 @@ export default function Changepassword({ route,navigation }: Props) {
 
         setIsLoading(true);
         setApiError('');
-        
+
         try {
-            const response = await fetch('http://localhost:3000/api/reset-password', {
+            const response = await fetch(
+                `${API_ENDPOINT}/api/reset-password`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -130,7 +132,7 @@ export default function Changepassword({ route,navigation }: Props) {
                 setPasswordStrength('');
 
                 navigation.navigate("Login");
-                
+
             } else {
                 // Handle backend validation errors
                 if (data.errors && Array.isArray(data.errors)) {
@@ -277,7 +279,7 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: 15,
         fontSize: 16,
-        color:"black"
+        color: "black"
     },
     inputError: {
         borderColor: '#F44336',

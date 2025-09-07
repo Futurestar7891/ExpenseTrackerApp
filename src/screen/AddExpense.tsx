@@ -18,8 +18,11 @@ import { FetchExpenses } from '../utils/Fetchexpenses';
 import Expensedata from '../components/Expensedata';
 import { RootStackParamsList } from '../routes/ProtectedRoute';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { API_ENDPOINT } from '@env';
 
 type Props = NativeStackScreenProps<RootStackParamsList, "Addexpense">;
+
+const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 export default function AddExpense({ route, navigation }: Props) {
     const [expandheight, setExpandHeight] = useState(false);
@@ -42,7 +45,7 @@ export default function AddExpense({ route, navigation }: Props) {
         if (editingExpense) {
             setAmount(editingExpense.amount.toString());
             setDescription(editingExpense.text || '');
-            
+
             toggleChooseCategory(editingExpense.category);
         }
     }, [editingExpense]);
@@ -65,8 +68,8 @@ export default function AddExpense({ route, navigation }: Props) {
             setLoading(true);
 
             const url = editingExpense
-                ? `http://localhost:3000/api/update-expense/${editingExpense._id}`
-                : 'http://localhost:3000/api/add-expense';
+                ? `${API_ENDPOINT}/api/update-expense/${editingExpense._id}`
+                : `${API_ENDPOINT}/api/add-expense?timezone=${timezone}`;
 
             const method = editingExpense ? 'PUT' : 'POST';
 
@@ -85,7 +88,7 @@ export default function AddExpense({ route, navigation }: Props) {
             if (data.success) {
                 setAmount('');
                 setDescription('');
-                FetchExpenses(setExpenseData, setDateRange, filters);
+                FetchExpenses(setExpenseData, setDateRange,filters);
                 navigation.goBack(); // return to previous screen
             } else {
                 if (data.fielderror === 'amount') setAmountError(data.message);

@@ -16,6 +16,7 @@ import { RootStackParamsList } from '../routes/PublicRoute';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useFilter } from '../Context';
 import OTPVerification from '../components/Otpverification';
+import { API_ENDPOINT } from '@env';
 
 type Props = NativeStackScreenProps<RootStackParamsList, 'Login'>;
 type BackendErrors = { email?: string; password?: string };
@@ -35,7 +36,9 @@ const handleLogin = async (
   const slowTimer = setTimeout(() => setSlowMessage(true), 5000);
 
   try {
-    const res = await fetch('http://localhost:3000/api/login', {
+    console.log("login",API_ENDPOINT);
+    const res = await fetch(
+      `${API_ENDPOINT}/api/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -80,15 +83,18 @@ export default function Login({ navigation }: Props) {
   const { setIsLoggedIn } = useFilter();
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [otpEmail, setOtpEmail] = useState('');
+  const [loggingText, setLoggingText] = useState(false);
 
   const handleForgotPassword = async (email: string) => {
 
     setLoading(true);
     setSlowMessage(false);
+    setLoggingText(true);
     const slowTimer = setTimeout(() => setSlowMessage(true), 5000);
 
     try {
-      const res = await fetch('http://localhost:3000/api/forgot-password', {
+      const res = await fetch(
+        `${API_ENDPOINT}/api/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
@@ -108,6 +114,7 @@ export default function Login({ navigation }: Props) {
     } finally {
       setLoading(false);
       setSlowMessage(false);
+      setLoggingText(false);
       clearTimeout(slowTimer);
     }
   };
@@ -125,7 +132,7 @@ export default function Login({ navigation }: Props) {
             <Text style={styles.loadingText}>
               {slowMessage
                 ? 'Server is taking longer than usual, please wait...'
-                : 'Logging in/Forgetting...'}
+                : loggingText === true ? "Forgetting---" : 'Logging---'}
             </Text>
           </View>
         )}
@@ -202,8 +209,8 @@ export default function Login({ navigation }: Props) {
                   value={values.password}
                   secureTextEntry
                   selectionColor="black"
-                
-                  
+
+
                 />
                 {errors.password && touched.password && (
                   <Text style={styles.inlineError}>{errors.password}</Text>
@@ -253,7 +260,7 @@ export default function Login({ navigation }: Props) {
               navigation.navigate('Changepassword', { email: otpEmail });
             }}
             onCancel={() => setShowOtpModal(false)}
-            endpoint="verify-forgot-otp" 
+            endpoint="verify-forgot-otp"
           />
         )}
       </ImageBackground>
@@ -287,7 +294,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#000',
     paddingVertical: 5,
     backgroundColor: 'transparent',
-    color:"black"
+    color: "black"
   },
   forgotcontainer: { marginVertical: 8, alignItems: 'flex-end' },
   forgottext: { color: 'blue' },

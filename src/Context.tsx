@@ -41,6 +41,7 @@ export type UserDetails = {
 type FilterContextType = {
     isloggedin: boolean;
     setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
+   
     user: UserDetails | null;
     setUser: React.Dispatch<React.SetStateAction<UserDetails | null>>;
     expenseData: ExpenseState,
@@ -78,6 +79,7 @@ export const useFilter = () => {
 
 export const FilterProvider = ({ children }: { children: ReactNode }) => {
     const [isloggedin, setIsLoggedIn] = useState<boolean>(false);
+    
     const [user, setUser] = useState<UserDetails | null>(null);
     const [expenseData,setExpenseData]=useState<ExpenseState>([]);
     const [daterange, setDateRange] = useState<dateRangeState>({
@@ -147,7 +149,7 @@ export const FilterProvider = ({ children }: { children: ReactNode }) => {
                 .filter((cat) => cat.trim() !== "All") 
                 .map((cat) => ({
                     name: cat.trim(),
-                    chosed: false,
+                    chosed: cat.trim() ==="Grocery 🛒",
                 }))
         );
     };
@@ -157,7 +159,7 @@ export const FilterProvider = ({ children }: { children: ReactNode }) => {
         setChooseCat((prev) =>
             prev.map((cat) => {
                 if (cat.name === category) {
-                    return { ...cat, chosed: !cat.chosed };
+                    return { ...cat, chosed: true };
                 } else {
                    
                     return { ...cat, chosed: false };
@@ -187,6 +189,7 @@ export const FilterProvider = ({ children }: { children: ReactNode }) => {
             value={{
                 isloggedin,
                 setIsLoggedIn,
+                
                 user,
                 setUser,
                 expenseData,

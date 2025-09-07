@@ -1,19 +1,22 @@
-import { UserDetails } from "../Context";
-
+import { UserDetails } from '../Context';
+import { API_ENDPOINT } from '@env';
 export const fetchLoginStatus = async (
   setIsLoggedIn: React.Dispatch<React.SetStateAction<boolean>>,
   setUser: React.Dispatch<React.SetStateAction<UserDetails | null>>,
 ) => {
   try {
-    console.log("run the loginstatus");
-    const res = await fetch('http://localhost:3000/api/fetch-login-status', {
-      method: 'GET',
-      credentials: 'include',
-    });
+    console.log('run the loginstatus');
+    const res = await fetch(
+      `${API_ENDPOINT}/api/fetch-login-status`,
+      {
+        method: 'GET',
+        credentials: 'include',
+      },
+    );
 
     const data = await res.json();
 
-    if(data.status==="401"){
+    if (data.status === '401') {
       setIsLoggedIn(false);
     }
 

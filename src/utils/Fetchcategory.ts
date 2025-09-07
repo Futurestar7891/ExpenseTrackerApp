@@ -1,14 +1,18 @@
+import { API_ENDPOINT } from "@env";
 export const FetchCategories = async (
   setCategories: (cats: string[]) => void,
   setLoading: (loading: boolean) => void,
 ) => {
   try {
     setLoading(true);
-    const response = await fetch('http://localhost:3000/api/get-categories', {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-    });
+    const response = await fetch(
+      `${API_ENDPOINT}/api/get-categories`,
+      {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+      },
+    );
 
     const data = await response.json();
     if (data.success) {

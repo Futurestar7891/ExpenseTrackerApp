@@ -1,4 +1,5 @@
 import { ExpenseState, dateRangeState } from '../Context';
+import { API_ENDPOINT } from '@env';
 
 export const FetchExpenses = async (
   setExpenseData: React.Dispatch<React.SetStateAction<ExpenseState>>,
@@ -6,8 +7,11 @@ export const FetchExpenses = async (
   filters?: any,
 ) => {
   try {
-    console.log("fetching expense");
+    
     const params = new URLSearchParams();
+
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    params.append('timezone', timezone);
 
     if (filters) {
       // Categories
@@ -25,13 +29,16 @@ export const FetchExpenses = async (
       if (filters.maxAmount)
         params.append('maxAmount', filters.maxAmount.toString());
 
-      // Dates
+      // Dates (already in yyyy-mm-dd from FiltersAndCategories)
       if (filters.startDate) params.append('startDate', filters.startDate);
       if (filters.endDate) params.append('endDate', filters.endDate);
     }
+    
+    console.log(filters.startDate);
+    console.log(filters.endDate);
 
     const response = await fetch(
-      `http://localhost:3000/api/get-expense?${params.toString()}`,
+      `${API_ENDPOINT}/api/get-expense?${params.toString()}`,
       {
         method: 'GET',
         headers: {
@@ -42,29 +49,25 @@ export const FetchExpenses = async (
     );
 
     const data = await response.json();
+
+    if (!data.success) {
+      if (data.fielderror) {
+         console.log(data.fielderror);
+      }
+    }
+
     if (data.success) {
       setExpenseData(data.expenses);
 
-      const formatDate = (dateString: string) => {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('en-GB', {
-          day: 'numeric',
-          month: 'short',
-          year: 'numeric',
-        });
-      };
-
-      // ✅ Update date range from backend
+      // ✅ Update date range in context
       if (data.daterange) {
         setDateRange({
-          startDate: formatDate(data.daterange.startDate),
-          endDate: formatDate(data.daterange.endDate),
+          startDate: data.daterange.startDate,
+          endDate: data.daterange.endDate,
         });
       }
-    } else {
-      console.error('Failed to fetch expenses:', data.message);
     }
   } catch (error) {
     console.error('Error fetching expenses:', error);
-  }
+  } 
 };
